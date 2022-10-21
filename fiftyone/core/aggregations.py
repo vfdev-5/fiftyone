@@ -2305,10 +2305,10 @@ def _parse_field_and_expr(
         pipeline.append({"$project": {path: True}})
     elif auto_unwind:
         if is_frame_field:
-            if context is None:
+            if context is None and not sample_collection._unwound_frames:
                 pipeline.append({"$unwind": "$frames"})
 
-            if not root and not context:
+            if not root and context:
                 pipeline.extend(
                     [
                         {"$project": {"frames." + path: True}},
