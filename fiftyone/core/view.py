@@ -1223,7 +1223,7 @@ class DatasetView(foc.SampleCollection):
 
         return self._dataset._pipeline(
             pipeline=_pipeline,
-            attach_frames=attach_frames,
+            attach_frames=attach_frames and not self._unwound_frames,
             detach_frames=detach_frames,
             frames_only=frames_only,
             support=support,
