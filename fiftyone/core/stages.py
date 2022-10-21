@@ -1900,7 +1900,12 @@ class FilterLabels(ViewStage):
         labels_field, is_frame_field = sample_collection._handle_frame_field(
             self._labels_field
         )
+        if sample_collection._unwound_frames:
+            labels_field = "frames." + labels_field
         new_field = self._get_new_field(sample_collection)
+        if sample_collection._unwound_frames:
+            labels_field = "frames." + labels_field
+            new_field = "frames." + new_field
 
         pipeline = []
 
@@ -1917,7 +1922,7 @@ class FilterLabels(ViewStage):
         else:
             label_filter = self._filter
 
-        if is_frame_field:
+        if is_frame_field and not sample_collection._unwound_frames:
             if self._is_labels_list_field:
                 _make_filter_pipeline = _get_filter_frames_list_field_pipeline
             else:
@@ -6941,6 +6946,31 @@ class ToFrames(ViewStage):
             },
             {"name": "_state", "type": "NoneType|json", "default": "None"},
         ]
+
+
+class _UnwindFrames(ViewStage):
+    def __init__(self, support=None):
+        self._support = support
+
+    @property
+    def support(self):
+        return self._support
+
+    def to_mongo(self, sample_collection):
+        return sample_collection._dataset._attach_frames_pipeline(
+            support=self._support
+        ) + [
+            {"$unwind": "$frames"},
+        ]
+
+    def _kwargs(self):
+        return [
+            ["support", self._support],
+        ]
+
+    @classmethod
+    def _params(self):
+        return []
 
 
 def _parse_sample_ids(arg):
