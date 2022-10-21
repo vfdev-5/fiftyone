@@ -18,8 +18,6 @@ import timeit
 import warnings
 
 from bson import ObjectId
-from deprecated import deprecated
-from fiftyone.core.odm.embedded_document import DynamicEmbeddedDocument
 from pymongo import InsertOne, UpdateOne
 
 import eta.core.serial as etas
@@ -8033,6 +8031,15 @@ class SampleCollection(object):
             the aggregation result dict
         """
         raise NotImplementedError("Subclass must implement _aggregate()")
+
+    @property
+    def _unwound_frames(self):
+        return any(
+            [
+                isinstance(stage, fos._UnwindFrames)
+                for stage in getattr(self, "_stages", [])
+            ]
+        )
 
     def _make_and_aggregate(self, make, args):
         if isinstance(args, (list, tuple)):
