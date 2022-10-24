@@ -29,26 +29,8 @@ def get_view(
     extended_stages=None,
     sample_filter=None,
     sort=False,
+    support=[1, 1],
 ):
-    """Get the view from request paramters
-
-    Args:
-        dataset_names: the dataset name
-        stages (None): an optional list of serialized
-            :class:`fiftyone.core.stages.ViewStage` instances
-        filters (None): an optional ``dict`` of App defined filters
-        extended_stages (None): extended view stages
-        count_label_tags (False): whether to set the hidden ``_label_tags``
-            field with counts of tags with respect to all label fields
-        only_matches (True): whether to filter unmatches samples when filtering
-            labels
-        sample_filter (None): an optional
-            :class:`fiftyone.server.filters.SampleFilter`
-        sort (False): whether to include sort extended stages
-
-    Returns:
-        a :class:`fiftyone.core.view.DatasetView`
-    """
     view = fod.load_dataset(dataset_name).view()
     view.reload()
 
@@ -75,6 +57,7 @@ def get_view(
             only_matches=only_matches,
             extended_stages=extended_stages,
             sort=sort,
+            support=support,
         )
 
     return view
@@ -87,21 +70,13 @@ def get_extended_view(
     only_matches=True,
     extended_stages=None,
     sort=False,
+    support=[1, 1],
 ):
-    """Create an extended view with the provided filters.
-
-    Args:
-        view: a :class:`fiftyone.core.collections.SampleCollection`
-        filters: an optional ``dict`` of App defined filters
-        count_label_tags (False): whether to set the hidden ``_label_tags``
-            field with counts of tags with respect to all label fields
-        only_matches (True): whether to filter unmatches samples when filtering
-            labels
-        extended_stages (None): extended view stages
-        sort (False): wheter to include sort extended stages
-    """
     cleanup_fields = set()
     filtered_labels = set()
+
+    if view.media_type == fom.VIDEO:
+        view = view.add_stage(fosg._UnwindFrames())
 
     label_tags = None
     if filters is not None and len(filters):
@@ -134,6 +109,25 @@ def get_extended_view(
         view = _add_labels_tags_counts(view, filtered_labels, label_tags)
         if cleanup_fields:
             view = view.mongo([{"$unset": field} for field in cleanup_fields])
+
+        if view.media_type == fom.VIDEO:
+            view = view.mongo(
+                [
+                    {"$project": {"frames": False}},
+                    {
+                        "$group": {
+                            "_id": "$_id",
+                            "sample": {"$first": "$$ROOT"},
+                            "_label_tags": _counts_accumulator("_label_tags"),
+                        },
+                    },
+                ]
+                + [
+                    {"$set": {"sample._label_tags": "$_label_tags"}},
+                    {"$replaceRoot": {"newRoot": "$sample"}},
+                ]
+                + view._dataset._attach_frames_pipeline(support=support)
+            )
 
     return view
 
@@ -475,30 +469,20 @@ def _get_filtered_path(view, path, filtered_fields, label_tags):
 
 
 def _add_frame_labels_tags(path, field, view):
-    frames, path = path.split(".")
     items = "%s.%s" % (path, field.document_type._LABEL_LIST_FIELD)
     view = view.set_field(
         _LABEL_TAGS,
-        F(_LABEL_TAGS).extend(
-            F(frames).reduce(
-                VALUE.extend(F(items).reduce(VALUE.extend(F("tags")), [])), []
-            )
-        ),
+        F(_LABEL_TAGS).extend(F(items).reduce(VALUE.extend(F("tags")), [])),
         _allow_missing=True,
     )
     return view
 
 
 def _add_frame_label_tags(path, field, view):
-    frames, path = path.split(".")
     tags = "%s.tags" % path
     view = view.set_field(
         _LABEL_TAGS,
-        F(_LABEL_TAGS).extend(
-            F(frames).reduce(
-                VALUE.extend((F(tags) != None).if_else(F(tags), [])), []
-            )
-        ),
+        F(_LABEL_TAGS).extend((F(tags) != None).if_else(F(tags), [])),
         _allow_missing=True,
     )
     return view
@@ -537,3 +521,27 @@ def _count_list_items(path, view):
     return view.set_field(
         path, F(path)._function(function), _allow_missing=True
     )
+
+
+def _counts_accumulator(field: str):
+    return {
+        "$accumulator": {
+            "init": """
+                function() {
+                    return {}
+                }
+            """,
+            "accumulate": """
+                function(state, merge) {
+                    return {}
+                }
+            """,
+            "accumulateArgs": [f"${field}"],
+            "merge": """
+                function(one, two) {
+                    return {}
+                }
+            """,
+            "lang": "js",
+        },
+    }

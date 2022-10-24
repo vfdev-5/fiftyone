@@ -5,13 +5,13 @@ FiftyOne Server /frames route
 | `voxel51.com <https://voxel51.com/>`_
 |
 """
+from bson import ObjectId
 from starlette.endpoints import HTTPEndpoint
 from starlette.requests import Request
 
 from fiftyone.core.expressions import ViewField as F
 import fiftyone.core.json as foj
 import fiftyone.core.odm as foo
-import fiftyone.core.view as fov
 
 from fiftyone.server.decorators import route
 import fiftyone.server.view as fosv
@@ -28,13 +28,20 @@ class Frames(HTTPEndpoint):
         stages = data.get("view")
         sample_id = data.get("sampleId")
 
-        view = fosv.get_view(dataset, stages=stages, extended_stages=extended)
-        view = fov.make_optimized_select_view(view, sample_id)
-
         end_frame = min(num_frames + start_frame, frame_count)
+
+        view = fosv.get_view(
+            dataset,
+            stages=stages,
+            extended_stages=extended,
+            support=[start_frame, end_frame],
+        )
         frames = await foo.aggregate(
             foo.get_async_db_conn()[view._dataset._sample_collection_name],
-            view._pipeline(frames_only=True, support=[start_frame, end_frame]),
+            [{"$match": {"_id": {"$in": [ObjectId(sample_id)]}}}]
+            + view._pipeline(
+                frames_only=True, support=[start_frame, end_frame]
+            ),
         ).to_list(end_frame - start_frame + 1)
 
         return {

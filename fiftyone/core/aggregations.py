@@ -557,6 +557,8 @@ class Count(Aggregation):
 
     def to_mongo(self, sample_collection, context=None):
         if self._field_name is None and self._expr is None:
+            if sample_collection._unwound_frames:
+                return [{"$group": {"_id": "$_id"}}, {"$count": "count"}]
             return [{"$count": "count"}]
 
         path, pipeline, _, _, _ = _parse_field_and_expr(
@@ -569,7 +571,9 @@ class Count(Aggregation):
         )
 
         if not sample_collection._contains_videos() or path != "frames":
-            pipeline.append({"$match": {"$expr": {"$gt": ["$" + path, None]}}})
+            pipeline += [
+                {"$match": {"$expr": {"$gt": ["$" + path, None]}}},
+            ]
 
         pipeline.append({"$count": "count"})
 
@@ -2239,6 +2243,17 @@ def _parse_field_and_expr(
     if safe:
         expr = _to_safe_expr(expr, field_type)
 
+    group_frames = []
+    if (
+        not context
+        and sample_collection._unwound_frames
+        and not field_name.startswith("frames.")
+    ):
+        group_frames += [
+            {"$group": {"_id": "$_id", "sample": {"$first": "$$ROOT"}}},
+            {"$replaceRoot": {"newRoot": "$sample"}},
+        ]
+
     if expr is not None:
         if field_name is None:
             field_name = "value"
@@ -2256,6 +2271,8 @@ def _parse_field_and_expr(
         )
     else:
         pipeline = []
+
+    pipeline = group_frames + pipeline
 
     (
         path,
@@ -2308,7 +2325,7 @@ def _parse_field_and_expr(
             if context is None and not sample_collection._unwound_frames:
                 pipeline.append({"$unwind": "$frames"})
 
-            if not root and context:
+            if not root and not context:
                 pipeline.extend(
                     [
                         {"$project": {"frames." + path: True}},

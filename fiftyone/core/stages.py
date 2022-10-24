@@ -1904,7 +1904,6 @@ class FilterLabels(ViewStage):
             labels_field = "frames." + labels_field
         new_field = self._get_new_field(sample_collection)
         if sample_collection._unwound_frames:
-            labels_field = "frames." + labels_field
             new_field = "frames." + new_field
 
         pipeline = []

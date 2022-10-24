@@ -139,7 +139,7 @@ async def aggregate_resolver(
     for aggs in aggregations:
         flattened += aggs
 
-    result = await view._async_aggregate(flattened)
+    result = await view._async_aggregate(flattened, debug=True)
     results = []
     offset = 0
     for length, deserialize in zip(counts, deserializers):
