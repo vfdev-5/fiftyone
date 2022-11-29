@@ -69,12 +69,9 @@ export namespace State {
     datasetId: string;
     name: string;
     urlName: string;
-    description: string;
-    color: string;
+    description?: string;
+    color?: string;
     viewStages: Stage[];
-    createdAt: DateTime;
-    lastModifiedAt: DateTime;
-    lastLoadedAt: DateTime;
   }
 
   export interface AnnotationRun extends Run {
