@@ -1,5 +1,12 @@
 union AggregationResponse = CountResponse | BoolCountValuesResponse | IntCountValuesResponse | StrCountValuesResponse | BoolDistinctResponse | IntDistinctResponse | StrDistinctResponse | DatetimeHistogramValuesResponse | FloatHistogramValuesResponse | IntHistogramValuesResponse
 
+input Aggregations {
+  count: Count = null
+  countValues: CountValues = null
+  distinct: Distinct = null
+  histogramValues: HistogramValues = null
+}
+
 type BoolCountValuesResponse {
   values: [BoolValueCount!]!
 }
@@ -13,12 +20,20 @@ type BoolValueCount {
   value: Int!
 }
 
+input Count {
+  field: String = null
+}
+
 type CountResponse {
   count: Int!
 }
 
+input CountValues {
+  field: String!
+}
+
 type Dataset {
-  aggregate: [AggregationResponse!]!
+  aggregate(aggregations: [Aggregations!]!, view: [JSON!] = null): [AggregationResponse!]!
 }
 
 type DatetimeHistogramValuesResponse {
@@ -27,10 +42,18 @@ type DatetimeHistogramValuesResponse {
   other: Int!
 }
 
+input Distinct {
+  field: String!
+}
+
 type FloatHistogramValuesResponse {
   counts: [Int!]!
   edges: [Float!]!
   other: Int!
+}
+
+input HistogramValues {
+  field: String!
 }
 
 type IntCountValuesResponse {
@@ -52,8 +75,13 @@ type IntValueCount {
   value: Int!
 }
 
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
 type Query {
-  dataset: Dataset!
+  dataset(name: String!): Dataset!
 }
 
 type StrCountValuesResponse {

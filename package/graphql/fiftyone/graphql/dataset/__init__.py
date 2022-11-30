@@ -5,4 +5,4 @@ FiftyOne GraphQL Dataset
 | `voxel51.com <https://voxel51.com/>`_
 |
 """
-from .dataset import Dataset
+from .dataset import DatasetMixin

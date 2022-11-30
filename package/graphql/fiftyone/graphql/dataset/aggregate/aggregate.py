@@ -57,8 +57,12 @@ AggregationsResponse = t.List[
 ]
 
 
-def aggregate(
-    aggregations: t.List[Aggregations],
-    view: t.Optional[t.List[gql.scalars.JSON]] = None,
-) -> AggregationsResponse:
-    raise NotImplementedError("resolver must be implemented")
+@gql.type
+class AggregateMixin:
+    @gql.field
+    def aggregate(
+        self,
+        aggregations: t.List[Aggregations],
+        view: t.Optional[t.List[gql.scalars.JSON]] = None,
+    ) -> AggregationsResponse:
+        raise NotImplementedError("resolver must be implemented")

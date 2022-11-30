@@ -5,12 +5,19 @@ FiftyOne GraphQL Dataset
 | `voxel51.com <https://voxel51.com/>`_
 |
 """
+import typing as t
 import strawberry as gql
 
-from .aggregate import aggregate, AggregationsResponse
+from .aggregate import AggregateMixin
 
 
 @gql.type
-class Dataset:
-    gql.field(resolver=aggregate)
-    aggregate: AggregationsResponse
+class Dataset(AggregateMixin):
+    pass
+
+
+@gql.type
+class DatasetMixin:
+    @gql.field
+    def dataset(self, name: str) -> Dataset:
+        raise NotImplementedError("resolver must be implemented")

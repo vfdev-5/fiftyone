@@ -5,4 +5,4 @@ FiftyOne GraphQL Aggregate
 | `voxel51.com <https://voxel51.com/>`_
 |
 """
-from .aggregate import aggregate, AggregationsResponse
+from .aggregate import AggregateMixin

@@ -7,9 +7,9 @@ FiftyOne GraphQL Query
 """
 import strawberry as gql
 
-from .dataset import Dataset
+from .dataset import DatasetMixin
 
 
 @gql.type
-class Query:
-    dataset: Dataset
+class Query(DatasetMixin):
+    pass
