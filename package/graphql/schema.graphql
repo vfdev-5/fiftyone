@@ -1,0 +1,72 @@
+union AggregationResponse = CountResponse | BoolCountValuesResponse | IntCountValuesResponse | StrCountValuesResponse | BoolDistinctResponse | IntDistinctResponse | StrDistinctResponse | DatetimeHistogramValuesResponse | FloatHistogramValuesResponse | IntHistogramValuesResponse
+
+type BoolCountValuesResponse {
+  values: [BoolValueCount!]!
+}
+
+type BoolDistinctResponse {
+  values: [Boolean!]!
+}
+
+type BoolValueCount {
+  key: Boolean
+  value: Int!
+}
+
+type CountResponse {
+  count: Int!
+}
+
+type Dataset {
+  aggregate: [AggregationResponse!]!
+}
+
+type DatetimeHistogramValuesResponse {
+  counts: [Int!]!
+  edges: [datetime!]!
+  other: Int!
+}
+
+type FloatHistogramValuesResponse {
+  counts: [Int!]!
+  edges: [Float!]!
+  other: Int!
+}
+
+type IntCountValuesResponse {
+  values: [IntValueCount!]!
+}
+
+type IntDistinctResponse {
+  values: [Int!]!
+}
+
+type IntHistogramValuesResponse {
+  counts: [Int!]!
+  edges: [Float!]!
+  other: Int!
+}
+
+type IntValueCount {
+  key: Int
+  value: Int!
+}
+
+type Query {
+  dataset: Dataset!
+}
+
+type StrCountValuesResponse {
+  values: [StrValueCount!]!
+}
+
+type StrDistinctResponse {
+  values: [String!]!
+}
+
+type StrValueCount {
+  key: String
+  value: Int!
+}
+
+scalar datetime
