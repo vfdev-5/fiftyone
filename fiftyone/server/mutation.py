@@ -53,6 +53,7 @@ class StateForm:
     labels: t.Optional[t.List[SelectedLabel]] = None
     extended: t.Optional[BSON] = None
     slice: t.Optional[str] = None
+    saved_view: t.Optional[str] = None
 
 
 @gql.type
@@ -167,7 +168,9 @@ class Mutation:
         else:
             state.view = fov.DatasetView._build(state.dataset, view)
 
-        await dispatch_event(subscription, StateUpdate(state=state))
+        await dispatch_event(
+            subscription, StateUpdate(state=state, saved_view=form.saved_view)
+        )
         dataset = await Dataset.resolver(state.dataset.name, view, info)
         return ViewResponse(view=state.view._serialize(), dataset=dataset)
 

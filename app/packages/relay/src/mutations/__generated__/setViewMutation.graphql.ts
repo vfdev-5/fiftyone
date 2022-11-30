@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<56be5c6fe96ae9ae34e5cddab797ee07>>
+ * @generated SignedSource<<0dc491039687dd05acce64a4f22f9d34>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,6 +17,7 @@ export type StateForm = {
   filters?: object | null;
   labels?: ReadonlyArray<SelectedLabel> | null;
   sampleIds?: ReadonlyArray<string> | null;
+  savedView?: string | null;
   slice?: string | null;
 };
 export type SelectedLabel = {

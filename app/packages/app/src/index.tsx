@@ -85,6 +85,7 @@ const App: React.FC = ({}) => {
             case Events.STATE_UPDATE: {
               const payload = JSON.parse(msg.data);
               const { colorscale, config, ...data } = payload.state;
+
               payload.refresh && refresh();
 
               const state = {
@@ -102,11 +103,18 @@ const App: React.FC = ({}) => {
                 dataset = state.dataset;
               }
 
-              const path = state.dataset
-                ? `/datasets/${encodeURIComponent(state.dataset)}${
-                    window.location.search
-                  }`
-                : `/${window.location.search}`;
+              const url = new URL(window.location.toString());
+              if (payload.saved_view) {
+                url.searchParams.set("view", payload.saved_view);
+              }
+
+              let search = url.searchParams.toString();
+              if (search.length) {
+                search = `?${search}`;
+              }
+              let path = state.dataset
+                ? `/datasets/${encodeURIComponent(state.dataset)}${search}`
+                : `/${search}`;
 
               contextRef.current.history.replace(path, {
                 state,

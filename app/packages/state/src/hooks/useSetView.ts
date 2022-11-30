@@ -58,6 +58,7 @@ const useSetView = (
               dataset: dataset.name,
               form: patch
                 ? {
+                    savedView: "REPLACE_ME",
                     filters: snapshot.getLoadable(filters).contents,
                     sampleIds: [
                       ...snapshot.getLoadable(selectedSamples).contents,

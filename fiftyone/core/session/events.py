@@ -88,6 +88,7 @@ class StateUpdate(Event):
 
     state: fos.StateDescription
     refresh: bool = False
+    saved_view: t.Optional[str] = None
 
 
 @dataclass
