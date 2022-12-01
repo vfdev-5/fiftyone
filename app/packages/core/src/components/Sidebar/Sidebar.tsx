@@ -441,27 +441,7 @@ const InteractiveSidebar = ({
   const [containerController] = useState(
     () => new Controller({ minHeight: 0 })
   );
-  const { savedViews = [] } = fos.useSavedViews();
   const loadedDatasetName = useRecoilValue<string>(fos.datasetName);
-
-  const setView = fos.useSetView();
-
-  const queryParams = new URLSearchParams(location.search);
-  const viewName = queryParams.get("view");
-  const hasSavedViews = savedViews?.length;
-
-  // TODO: MANI - load view by url_name instead of name
-  useEffect(() => {
-    if (hasSavedViews && viewName && !modal) {
-      const theLoadedDataset = savedViews.filter(
-        (ds: fos.State.SavedView) => ds.name === viewName
-      )?.[0];
-      if (theLoadedDataset) {
-        const { urlName } = theLoadedDataset;
-        setView([], [], viewName, true, urlName);
-      }
-    }
-  }, [hasSavedViews, viewName, modal]);
 
   if (entries instanceof Error) {
     throw entries;
