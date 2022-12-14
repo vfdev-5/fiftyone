@@ -2434,6 +2434,7 @@ class Dataset(foc.SampleCollection, metaclass=DatasetSingleton):
         dynamic=False,
         validate=True,
         num_samples=None,
+        progress=True,
     ):
         """Adds the given samples to the dataset.
 
@@ -2455,6 +2456,7 @@ class Dataset(foc.SampleCollection, metaclass=DatasetSingleton):
             num_samples (None): the number of samples in ``samples``. If not
                 provided, this is computed via ``len(samples)``, if possible.
                 This value is optional and is used only for progress tracking
+            progress (True): whether to show the progress bar of the import
 
         Returns:
             a list of IDs of the samples in the dataset
@@ -2472,7 +2474,7 @@ class Dataset(foc.SampleCollection, metaclass=DatasetSingleton):
             target_latency=0.2,
             init_batch_size=1,
             max_batch_beta=2.0,
-            progress=True,
+            progress=progress,
             total=num_samples,
         )
 
