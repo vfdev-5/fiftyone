@@ -7,6 +7,7 @@ FiftyOne config.
 """
 import logging
 import os
+import typing as t
 
 try:
     from importlib import metadata as importlib_metadata  # Python 3.8
@@ -18,6 +19,7 @@ import pytz
 import eta
 import eta.core.config as etac
 
+from fiftyone.core.coloring import CustomizedColor
 import fiftyone.constants as foc
 import fiftyone.core.utils as fou
 
@@ -295,23 +297,9 @@ class AppConfig(EnvConfig):
             env_var="FIFTYONE_APP_COLOR_POOL",
             default=foc.DEFAULT_APP_COLOR_POOL,
         )
-        self.customized_colors = [
-            {
-                "field": "test",
-                "useFieldColor": False,
-                "fieldColor": "test",
-                "attributeForColor": "test",
-                "useOpacity": False,
-                "attributeForOpacity": "test",
-                "useLabelColors": False,
-                "labelColors": [
-                    {
-                        "name": "test",
-                        "color": "test",
-                    }
-                ],
-            }
-        ]
+        self.customized_colors = self.parse_dict(
+            d, "customized_colors", env_var="FIFTYONE_APP_CONFIG", default=[]
+        )
         self.colorscale = self.parse_string(
             d,
             "colorscale",
@@ -445,6 +433,18 @@ class AppConfig(EnvConfig):
                 default_color_by,
             )
             self.color_by = default_color_by
+
+        if self.customized_colors:
+            try:
+                self.customized_colors = [
+                    CustomizedColor.from_dict(d)
+                    for d in self.customized_colors
+                ]
+            except:
+                self.customized_colors = []
+                logger.warning(
+                    "Invalid customized colors array. Defaulting to []"
+                )
 
         supported_sidebar_modes = {"all", "best", "fast"}
         default_sidebar_mode = "best"
