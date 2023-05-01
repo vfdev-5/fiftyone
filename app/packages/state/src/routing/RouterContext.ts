@@ -1,5 +1,5 @@
-import React from "react";
 import { createBrowserHistory, createMemoryHistory } from "history";
+import React from "react";
 import { loadQuery, PreloadedQuery } from "react-relay";
 import {
   Environment,
@@ -22,8 +22,14 @@ import {
 } from "@fiftyone/utilities";
 import RouteDefinition, { RouteBase } from "./RouteDefinition";
 
-import { MatchPathResult, matchPath } from "./matchPath";
 import { Route } from "..";
+import { matchPath, MatchPathResult } from "./matchPath";
+
+let selectedFields = null;
+
+export const setExtendedSelectedFields = (stage) => {
+  selectedFields = stage;
+};
 
 export interface RouteData<
   T extends OperationType | undefined = OperationType
@@ -65,6 +71,12 @@ export interface Router<T extends OperationType | undefined = OperationType> {
   context: RoutingContext<T>;
 }
 
+let context: RoutingContext;
+
+export const getContext = () => {
+  return context;
+};
+
 export const createRouter = (
   environment: Environment,
   routes: RouteDefinition[],
@@ -105,7 +117,7 @@ export const createRouter = (
     subscribers.forEach((cb) => cb(nextEntry));
   });
 
-  const context: RoutingContext = {
+  context = {
     history,
     get() {
       if (!currentEntry) {
@@ -226,6 +238,13 @@ const prepareMatches = <T extends OperationType | undefined = OperationType>(
         if (routeQuery !== undefined) {
           const prepared = new Resource(() =>
             routeQuery.load().then((q) => {
+              if (q.operation.name === "DatasetQuery" && selectedFields) {
+                matchData.variables.view = [
+                  ...(matchData.variables.view || []),
+                  selectedFields,
+                ];
+              }
+
               return loadQuery(environment, q, matchData.variables || {}, {
                 fetchPolicy: "network-only",
               });
