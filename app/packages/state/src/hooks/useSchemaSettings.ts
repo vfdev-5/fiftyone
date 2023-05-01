@@ -56,13 +56,11 @@ export const selectedFieldsStageState = atom<any>({
   effects: [
     ({ onSet }) => {
       onSet((value) => {
-        console.log(value);
-        fos.setExtendedSelectedFields(value);
         const context = fos.getContext();
         value &&
           context.history.replace(
             `${context.history.location.pathname}${context.history.location.search}`,
-            context.history.location.state
+            { ...context.history.location.state, selectedFieldsStage: value }
           );
       });
     },

@@ -1,4 +1,4 @@
-import { createBrowserHistory, createMemoryHistory } from "history";
+import { createBrowserHistory, createMemoryHistory, Location } from "history";
 import React from "react";
 import { loadQuery, PreloadedQuery } from "react-relay";
 import {
@@ -24,12 +24,6 @@ import RouteDefinition, { RouteBase } from "./RouteDefinition";
 
 import { Route } from "..";
 import { matchPath, MatchPathResult } from "./matchPath";
-
-let selectedFields = null;
-
-export const setExtendedSelectedFields = (stage) => {
-  selectedFields = stage;
-};
 
 export interface RouteData<
   T extends OperationType | undefined = OperationType
@@ -107,7 +101,7 @@ export const createRouter = (
       location.search
     );
 
-    const entries = prepareMatches(environment, matches);
+    const entries = prepareMatches(location, environment, matches);
     const nextEntry: Entry<any> = {
       pathname: location.pathname,
       state: location.state,
@@ -126,6 +120,7 @@ export const createRouter = (
 
           state: history.location.state,
           entries: prepareMatches(
+            history.location,
             environment,
             matchRoute(
               routes,
@@ -217,6 +212,7 @@ const matchRoute = <T extends OperationType | undefined = OperationType>(
 };
 
 const prepareMatches = <T extends OperationType | undefined = OperationType>(
+  location: Location,
   environment: Environment,
   matches: Match<T>[]
 ) => {
@@ -238,10 +234,13 @@ const prepareMatches = <T extends OperationType | undefined = OperationType>(
         if (routeQuery !== undefined) {
           const prepared = new Resource(() =>
             routeQuery.load().then((q) => {
-              if (q.operation.name === "DatasetQuery" && selectedFields) {
+              if (
+                q.operation.name === "DatasetQuery" &&
+                location.state?.selectedFieldsStage
+              ) {
                 matchData.variables.view = [
                   ...(matchData.variables.view || []),
-                  selectedFields,
+                  location.state?.selectedFieldsStage,
                 ];
               }
 
