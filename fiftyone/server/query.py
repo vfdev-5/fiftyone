@@ -342,7 +342,6 @@ class AppConfig:
 
 @gql.type
 class Query(fosa.AggregateQuery):
-
     aggregations = gql.field(resolver=aggregate_resolver)
 
     @gql.field
@@ -393,10 +392,10 @@ class Query(fosa.AggregateQuery):
 
     @gql.field
     async def sample(
-        self, dataset: str, view: BSONArray, filter: SampleFilter
+        self, dataset: str, view: BSONArray, filter: SampleFilter, index: int
     ) -> t.Optional[SampleItem]:
         samples = await paginate_samples(
-            dataset, view, None, 1, sample_filter=filter
+            dataset, view, None, 1, after=index - 1, sample_filter=filter
         )
         if samples.edges:
             return samples.edges[0].node
