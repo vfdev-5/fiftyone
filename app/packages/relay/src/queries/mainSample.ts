@@ -8,7 +8,8 @@ export default r(graphql`
     $view: BSONArray!
     $filter: SampleFilter!
   ) {
-    sample(dataset: $dataset, view: $view, filter: $filter) {
+    sample(dataset: $dataset, view: $view, filter: $filter, index: $index) {
+      __typename
       ... on ImageSample {
         id
         sample

@@ -1,4 +1,4 @@
-import { modal } from "@fiftyone/state";
+import { modalSampleIndex } from "@fiftyone/state";
 import React from "react";
 import { useRecoilValue } from "recoil";
 import styled from "styled-components";
@@ -22,7 +22,7 @@ const Body = styled.div`
 `;
 
 function Dataset() {
-  const isModalActive = Boolean(useRecoilValue(modal));
+  const isModalActive = useRecoilValue(modalSampleIndex) !== null;
 
   return (
     <>

@@ -5,12 +5,14 @@ import {
   useRecoilTransaction_UNSTABLE,
 } from "recoil";
 import {
+  State,
+  _activeFields,
   dataset as datasetAtom,
   extendedSelection,
   filters,
   groupSlice,
   groupStatistics,
-  modal,
+  modalSampleIndex,
   patching,
   resolveGroups,
   savingFilters,
@@ -22,12 +24,9 @@ import {
   sidebarMode,
   similarityParameters,
   similaritySorting,
-  State,
   tagging,
   theme,
-  _activeFields,
 } from "../recoil";
-
 import * as viewAtoms from "../recoil/view";
 import { collapseFields, viewsAreEqual } from "../utils";
 
@@ -151,7 +150,7 @@ const useStateUpdate = (ignoreSpaces = false) => {
         set(datasetAtom, dataset);
       }
 
-      set(modal, null);
+      set(modalSampleIndex, null);
 
       [true, false].forEach((i) =>
         [true, false].forEach((j) =>

@@ -1,3 +1,14 @@
+import { PopoutSectionTitle, useTheme } from "@fiftyone/components";
+import { FrameLooker, ImageLooker, VideoLooker } from "@fiftyone/looker";
+import * as fos from "@fiftyone/state";
+import {
+  Lookers,
+  currentSlice,
+  groupId,
+  groupStatistics,
+  refresher,
+} from "@fiftyone/state";
+import { getFetchFunction } from "@fiftyone/utilities";
 import { useSpring } from "@react-spring/web";
 import numeral from "numeral";
 import React, {
@@ -16,27 +27,15 @@ import {
   useSetRecoilState,
 } from "recoil";
 import styled from "styled-components";
-
-import { PopoutSectionTitle, useTheme } from "@fiftyone/components";
-import { FrameLooker, ImageLooker, VideoLooker } from "@fiftyone/looker";
-import * as fos from "@fiftyone/state";
-import {
-  currentSlice,
-  groupId,
-  groupStatistics,
-  Lookers,
-  refresher,
-} from "@fiftyone/state";
-import { getFetchFunction } from "@fiftyone/utilities";
 import LoadingDots from "../../../../components/src/components/Loading/LoadingDots";
 import { Button } from "../utils";
 import Checker, { CheckState } from "./Checker";
 import Popout from "./Popout";
 import {
-  numItemsInSelection,
-  selectedSamplesCount,
   SwitchDiv,
   SwitcherDiv,
+  numItemsInSelection,
+  selectedSamplesCount,
   tagParameters,
   tagStatistics,
   tagStats,
@@ -329,7 +328,9 @@ const useTagCallback = (
   return useRecoilCallback(
     ({ snapshot, set, reset }) =>
       async ({ changes }) => {
-        const modalData = modal ? await snapshot.getPromise(fos.modal) : null;
+        const modalData = modal
+          ? await snapshot.getPromise(fos.modalSample)
+          : null;
         const isGroup = await snapshot.getPromise(fos.isGroup);
 
         const { samples } = await getFetchFunction()("POST", "/tag", {
@@ -366,8 +367,7 @@ const useTagCallback = (
         if (samples) {
           set(fos.refreshGroupQuery, (cur) => cur + 1);
           samples.forEach((sample) => {
-            if (modalData.sample._id === sample._id) {
-              set(fos.modal, { ...modalData, sample });
+            if (modalData?.id === sample._id) {
               lookerRef &&
                 lookerRef.current &&
                 lookerRef.current.updateSample(sample);

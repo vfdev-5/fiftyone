@@ -8,6 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import ReactDOM from "react-dom";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import styled from "styled-components";
 import { ExternalLink } from "../../utils/generic";
@@ -259,6 +260,8 @@ function FieldInfoExpanded({
     el.current.style.top = top + "px";
     el.current.style.left = left + "px";
   };
+
+  const isModal = useRecoilValue(fos.modalSampleIndex) !== null;
 
   useEffect(updatePosition, [field, isCollapsed]);
   const timeZone = useRecoilValue(fos.timeZone);

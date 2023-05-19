@@ -1,23 +1,7 @@
-import { atom, atomFamily, useRecoilCallback } from "recoil";
-
 import { Sample } from "@fiftyone/looker/src/state";
-
 import { SpaceNodeJSON } from "@fiftyone/spaces";
+import { atom, atomFamily, useRecoilCallback } from "recoil";
 import { State } from "./types";
-
-export interface AppSample extends Sample {
-  _id: string;
-  support?: [number, number];
-}
-
-export interface ModalNavigation {
-  index: number;
-  setIndex: (index: number) => void;
-}
-
-export interface ModalSample extends SampleData {
-  navigation: ModalNavigation;
-}
 
 export const refresher = atom<number>({
   key: "refresher",
@@ -72,8 +56,8 @@ export const getBrowserStorageEffectForKey =
     });
   };
 
-export const modalSampleId = atom<ModalSample | null>({
-  key: "modalSampleId",
+export const modalSampleIndex = atom<number | null>({
+  key: "modalSampleIndex",
   default: null,
 });
 

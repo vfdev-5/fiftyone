@@ -1,4 +1,3 @@
-import { Apps } from "@mui/icons-material";
 import Color from "color";
 import React, { Suspense } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
@@ -59,6 +58,7 @@ const SliderContainer = styled.div`
 
 const Count = () => {
   let element = useRecoilValue(fos.elementNames);
+
   const total = useRecoilValue(
     fos.count({ path: "", extended: false, modal: false })
   );
@@ -82,7 +82,7 @@ const Count = () => {
 };
 
 const GroupsCount = () => {
-  let element = useRecoilValue(fos.elementNames);
+  const element = useRecoilValue(fos.elementNames);
   const total = useRecoilValue(
     fos.count({ path: "_", extended: false, modal: false })
   );
@@ -149,9 +149,7 @@ const ImageContainerHeader = () => {
               setGridZoom(Math.max(gridZoomRangeValue[0], 5));
             }}
             style={{ cursor: "pointer", display: "flex" }}
-          >
-            <Apps />
-          </div>
+          ></div>
         </SliderContainer>
       </RightContainer>
     </SamplesHeader>

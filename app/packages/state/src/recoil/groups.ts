@@ -7,21 +7,16 @@ import {
   pinnedSample,
   pinnedSampleQuery,
 } from "@fiftyone/relay";
-
 import { VariablesOf } from "react-relay";
 import { atom, atomFamily, selector, selectorFamily } from "recoil";
-
 import { graphQLSelector, graphQLSelectorFamily } from "recoil-relay";
 import type { ResponseFrom } from "../utils";
 import {
-  AppSample,
   dataset,
   getBrowserStorageEffectForKey,
-  modal,
-  modal as modalAtom,
-  SampleData,
   sidebarOverride,
 } from "./atoms";
+import { ModalSample, modalSample } from "./modal";
 import { RelayEnvironmentKey } from "./relay";
 import { datasetName } from "./selectors";
 import { view } from "./view";
@@ -120,7 +115,7 @@ export const groupField = selector<string>({
 export const groupId = selector<string>({
   key: "groupId",
   get: ({ get }) => {
-    return get(modalAtom)?.sample[get(groupField)]?._id;
+    return get(modalSample).sample[get(groupField)]?._id;
   },
 });
 
@@ -138,7 +133,7 @@ export const groupQuery = graphQLSelector<
   mapResponse: (response) => response,
   query: paginateGroup,
   variables: ({ get }) => {
-    const sample = get(modalAtom).sample;
+    const sample = get(modalSample).sample;
 
     const group = get(groupField);
 
@@ -201,7 +196,7 @@ export const groupPaginationFragment = selector<paginateGroup_query$key>({
 });
 
 export const activeModalSample = selectorFamily<
-  AppSample | ResponseFrom<pinnedSampleQuery>["sample"],
+  ResponseFrom<pinnedSampleQuery>["sample"],
   SliceName
 >({
   key: "activeModalSample",
@@ -209,7 +204,7 @@ export const activeModalSample = selectorFamily<
     (sliceName) =>
     ({ get }) => {
       if (!sliceName || !get(isGroup)) {
-        return get(modalAtom).sample;
+        return get(modalSample).sample;
       }
 
       if (get(sidebarOverride) || get(pinnedSlice) === sliceName) {
@@ -238,14 +233,14 @@ const groupSampleQuery = graphQLSelectorFamily<
         filter: {
           group: {
             slice: slice ?? get(groupSlice(true)),
-            id: get(modal).sample[get(groupField)]._id,
+            id: get(modalSample).sample[get(groupField)]._id,
           },
         },
       };
     },
 });
 
-export const groupSample = selectorFamily<SampleData, SliceName>({
+export const groupSample = selectorFamily<ModalSample, SliceName>({
   key: "mainGroupSample",
   get:
     (sliceName) =>
@@ -257,7 +252,7 @@ export const groupSample = selectorFamily<SampleData, SliceName>({
       const field = get(groupField);
       const group = get(isGroup);
 
-      const sample = get(modal);
+      const sample = get(modalSample);
 
       if (!field || !group) return sample;
 

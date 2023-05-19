@@ -1,26 +1,15 @@
-import React, {
-  Suspense,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react";
-import { useRecoilCallback, useRecoilValue } from "recoil";
-import { v4 as uuid } from "uuid";
-
 import Flashlight from "@fiftyone/flashlight";
 import { freeVideos } from "@fiftyone/looker";
-
-import { useEventHandler } from "@fiftyone/state";
+import * as fos from "@fiftyone/state";
+import { deferrer, stringifyObj, useEventHandler } from "@fiftyone/state";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
+import { useRecoilCallback, useRecoilValue } from "recoil";
+import { v4 as uuid } from "uuid";
 import { flashlightLooker } from "./Grid.module.css";
 import { rowAspectRatioThreshold } from "./recoil";
 import useExpandSample from "./useExpandSample";
 import usePage from "./usePage";
 import useResize from "./useResize";
-
-import * as fos from "@fiftyone/state";
-import { deferrer, stringifyObj } from "@fiftyone/state";
-import EmptySamples from "../EmptySamples";
 
 const Grid: React.FC<{}> = () => {
   const [id] = React.useState(() => uuid());
@@ -38,7 +27,7 @@ const Grid: React.FC<{}> = () => {
   const threshold = useRecoilValue(rowAspectRatioThreshold);
   const resize = useResize();
 
-  const isModalOpen = Boolean(useRecoilValue(fos.modal));
+  const isModalOpen = useRecoilValue(fos.modalSampleIndex) !== null;
 
   // create flashlight only one time
   const [flashlight] = React.useState(() => {
@@ -159,14 +148,14 @@ const Grid: React.FC<{}> = () => {
     document,
     "keydown",
     useRecoilCallback(
-      ({ snapshot, set }) =>
+      ({ snapshot, reset }) =>
         async (event: KeyboardEvent) => {
           if (event.key !== "Escape") {
             return;
           }
 
-          if (!(await snapshot.getPromise(fos.modal))) {
-            set(fos.selectedSamples, new Set());
+          if ((await snapshot.getPromise(fos.modalSampleIndex)) === null) {
+            reset(fos.selectedSamples);
           }
         },
       []

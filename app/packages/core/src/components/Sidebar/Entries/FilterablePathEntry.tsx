@@ -1,61 +1,54 @@
-import React, { useMemo } from "react";
-import {
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-  VisibilityOff,
-} from "@mui/icons-material";
-import { Checkbox } from "@mui/material";
-import {
-  atomFamily,
-  DefaultValue,
-  selectorFamily,
-  useRecoilCallback,
-  useRecoilState,
-  useRecoilValue,
-} from "recoil";
-import Color from "color";
-
+import { PillButton, useTheme } from "@fiftyone/components";
+import { KeypointSkeleton } from "@fiftyone/looker/src/state";
+import * as fos from "@fiftyone/state";
 import {
   BOOLEAN_FIELD,
   DATE_FIELD,
   DATE_TIME_FIELD,
   DETECTION,
   DETECTIONS,
-  Field,
   FLOAT_FIELD,
   FRAME_NUMBER_FIELD,
   FRAME_SUPPORT_FIELD,
+  Field,
   INT_FIELD,
   KEYPOINTS,
   LABELS,
   LABELS_PATH,
   LIST_FIELD,
-  meetsFieldType,
   OBJECT_ID_FIELD,
   STRING_FIELD,
   VALID_KEYPOINTS,
   VALID_PRIMITIVE_TYPES,
+  meetsFieldType,
   withPath,
 } from "@fiftyone/utilities";
-
+import {
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+  VisibilityOff,
+} from "@mui/icons-material";
+import { Checkbox } from "@mui/material";
+import Color from "color";
+import React, { useMemo } from "react";
+import {
+  DefaultValue,
+  selectorFamily,
+  useRecoilCallback,
+  useRecoilState,
+  useRecoilValue,
+} from "recoil";
+import FieldLabelAndInfo from "../../FieldLabelAndInfo";
 import {
   BooleanFieldFilter,
   NumericFieldFilter,
   StringFieldFilter,
 } from "../../Filters";
-
-import { useTheme, PillButton } from "@fiftyone/components";
-import { KeypointSkeleton } from "@fiftyone/looker/src/state";
-import * as fos from "@fiftyone/state";
-
-import FieldLabelAndInfo from "../../FieldLabelAndInfo";
+import LabelFieldFilter from "../../Filters/LabelFieldFilter";
 import { NameAndCountContainer } from "../../utils";
 import { PathEntryCounts } from "./EntryCounts";
 import RegularEntry from "./RegularEntry";
 import { makePseudoField, pathIsExpanded } from "./utils";
-import LabelFieldFilter from "../../Filters/LabelFieldFilter";
-
-import { labelTagCounts, sampleTagCounts } from "@fiftyone/state";
 
 const FILTERS = {
   [BOOLEAN_FIELD]: BooleanFieldFilter,
@@ -183,7 +176,7 @@ const hiddenPathLabels = selectorFamily<string[], string>({
     (path) =>
     ({ get }) => {
       const data = get(fos.pathHiddenLabelsMap);
-      const sampleId = get(fos.modal).sample._id;
+      const sampleId = get(fos.modalSampleId);
 
       if (data[sampleId]) {
         return data[sampleId][path] || [];
@@ -195,7 +188,7 @@ const hiddenPathLabels = selectorFamily<string[], string>({
     (path) =>
     ({ set, get }, value) => {
       const data = get(fos.pathHiddenLabelsMap);
-      const sampleId = get(fos.modal).sample._id;
+      const sampleId = get(fos.modalSample);
 
       set(fos.pathHiddenLabelsMap, {
         ...data,

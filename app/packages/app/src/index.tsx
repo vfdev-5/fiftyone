@@ -4,17 +4,17 @@ import { usePlugins } from "@fiftyone/plugins";
 import {
   BeforeScreenshotContext,
   EventsContext,
-  getDatasetName,
-  modal,
-  screenshotCallbacks,
   State,
-  stateSubscription,
-  useReset,
-  useClearModal,
-  useScreenshot,
-  useRouter,
-  useRefresh,
+  getDatasetName,
   getSavedViewName,
+  modalSampleIndex,
+  screenshotCallbacks,
+  stateSubscription,
+  useClearModal,
+  useRefresh,
+  useReset,
+  useRouter,
+  useScreenshot,
 } from "@fiftyone/state";
 import { getEventSource, toCamelCase } from "@fiftyone/utilities";
 import React, { useEffect, useRef, useState } from "react";
@@ -57,7 +57,7 @@ const App: React.FC = ({}) => {
     new URLSearchParams(window.location.search).get("context")
   );
 
-  const isModalActive = Boolean(useRecoilValue(modal));
+  const isModalActive = useRecoilValue(modalSampleIndex) !== null;
   const handleError = useErrorHandler();
 
   useEffect(() => {

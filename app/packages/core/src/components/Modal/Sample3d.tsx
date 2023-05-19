@@ -1,18 +1,16 @@
+import { Loading } from "@fiftyone/components";
 import { PluginComponentType, usePlugin } from "@fiftyone/plugins";
 import * as fos from "@fiftyone/state";
 import {
   getSampleSrc,
-  modal,
   selectedMediaField,
   useOnSelectLabel,
 } from "@fiftyone/state";
 import React, { Suspense, useMemo } from "react";
-
-import { Loading } from "@fiftyone/components";
 import { useRecoilValue } from "recoil";
 
 const PluggableSample = () => {
-  const data = useRecoilValue(modal);
+  const data = useRecoilValue(fos.modalSample);
 
   if (!data) {
     throw new Error("no data");
