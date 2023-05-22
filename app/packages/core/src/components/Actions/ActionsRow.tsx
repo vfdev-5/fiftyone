@@ -5,10 +5,10 @@ import {
   KeyboardArrowLeft,
   KeyboardArrowRight,
   LocalOffer,
+  Search,
   Settings,
   VisibilityOff,
   Wallpaper,
-  Search,
 } from "@mui/icons-material";
 import React, { MutableRefObject, useCallback, useRef, useState } from "react";
 import useMeasure from "react-use-measure";

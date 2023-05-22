@@ -98,7 +98,7 @@ const Looker = ({
 
     return {
       ...modalSampleData,
-      sample: propsSampleData,
+      sample: propsSampleData || modalSampleData.sample,
       urls: transformedUrls,
     };
   }, [propsSampleData, modalSampleData, urls]);

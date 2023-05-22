@@ -11,6 +11,7 @@ import { useEventHandler } from "@fiftyone/state";
 import { Controller } from "@react-spring/core";
 import React, {
   Fragment,
+  Suspense,
   useCallback,
   useEffect,
   useRef,
@@ -301,13 +302,15 @@ const SampleModal = () => {
               </Arrow>
             )}
             <ErrorBoundary onReset={() => {}}>
-              {isGroup ? (
-                <Group lookerRefCallback={lookerRefCallback} />
-              ) : isPcd ? (
-                <Sample3d />
-              ) : (
-                <Sample lookerRefCallback={lookerRefCallback} />
-              )}
+              <Suspense>
+                {isGroup ? (
+                  <Group lookerRefCallback={lookerRefCallback} />
+                ) : isPcd ? (
+                  <Sample3d />
+                ) : (
+                  <Sample lookerRefCallback={lookerRefCallback} />
+                )}
+              </Suspense>
               {jsonPanel.isOpen && (
                 <JSONPanel
                   containerRef={jsonPanel.containerRef}

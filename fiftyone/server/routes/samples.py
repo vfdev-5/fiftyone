@@ -35,6 +35,7 @@ class Samples(HTTPEndpoint):
             (page - 1) * page_length - 1,
             sample_filter=SampleFilter(group=GroupElementFilter(slice=slice)),
             extended_stages=extended,
+            pagination_data=True,
         )
 
         return JSONResponse(
