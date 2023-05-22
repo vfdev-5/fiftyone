@@ -30,6 +30,7 @@ import subprocess
 import sys
 import timeit
 import types
+import typing as t
 from xml.parsers.expat import ExpatError
 import zlib
 
@@ -51,6 +52,7 @@ try:
 except:
     import pprint as _pprint
 
+import asyncio
 import numpy as np
 import pytz
 import xmltodict
@@ -1732,6 +1734,22 @@ def to_slug(name):
         )
 
     return slug
+
+
+_T = t.TypeVar("_T")
+
+
+async def run_sync_task(
+    func: t.Callable[..., _T], *args: t.Any
+) -> asyncio.Future[_T]:
+    """
+    Run a synchronous function as an async background task
+    Args:
+        run: a synchronous callable
+    """
+    loop = asyncio.get_running_loop()
+
+    return await loop.run_in_executor(None, func, *args)
 
 
 def validate_hex_color(value):

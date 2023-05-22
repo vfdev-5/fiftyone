@@ -1,9 +1,5 @@
 /**
-<<<<<<< HEAD
- * @generated SignedSource<<5dd66d8bb092f30a878ecc8d1737dd8d>>
-=======
- * @generated SignedSource<<db6c5e51a0149510460a52970649c85f>>
->>>>>>> ca44d57e9 (modal network request)
+ * @generated SignedSource<<321b0b6f8398786d409d41ae9f00ba1f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -24,6 +20,8 @@ export type GroupElementFilter = {
 export type mainSampleQuery$variables = {
   dataset: string;
   filter: SampleFilter;
+  filters?: object | null;
+  index: number;
   view: Array;
 };
 export type mainSampleQuery$data = {
@@ -69,9 +67,19 @@ v1 = {
 v2 = {
   "defaultValue": null,
   "kind": "LocalArgument",
+  "name": "filters"
+},
+v3 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "index"
+},
+v4 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
   "name": "view"
 },
-v3 = [
+v5 = [
   {
     "kind": "Variable",
     "name": "dataset",
@@ -84,32 +92,42 @@ v3 = [
   },
   {
     "kind": "Variable",
+    "name": "filters",
+    "variableName": "filters"
+  },
+  {
+    "kind": "Variable",
+    "name": "index",
+    "variableName": "index"
+  },
+  {
+    "kind": "Variable",
     "name": "view",
     "variableName": "view"
   }
 ],
-v4 = {
+v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "__typename",
   "storageKey": null
 },
-v5 = {
+v7 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v6 = {
+v8 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "sample",
   "storageKey": null
 },
-v8 = {
+v9 = {
   "alias": null,
   "args": null,
   "concreteType": "MediaURL",
@@ -134,38 +152,21 @@ v8 = {
   ],
   "storageKey": null
 },
-<<<<<<< HEAD
-v7 = {
+v10 = {
   "kind": "InlineFragment",
   "selections": [
-    (v4/*: any*/),
-    (v5/*: any*/),
-    (v6/*: any*/)
-=======
-v9 = {
-  "kind": "InlineFragment",
-  "selections": [
-    (v6/*: any*/),
     (v7/*: any*/),
-    (v8/*: any*/)
->>>>>>> ca44d57e9 (modal network request)
+    (v8/*: any*/),
+    (v9/*: any*/)
   ],
   "type": "ImageSample",
   "abstractKey": null
 },
-<<<<<<< HEAD
-v8 = {
+v11 = {
   "kind": "InlineFragment",
   "selections": [
-    (v4/*: any*/),
-    (v5/*: any*/),
-=======
-v10 = {
-  "kind": "InlineFragment",
-  "selections": [
-    (v6/*: any*/),
     (v7/*: any*/),
->>>>>>> ca44d57e9 (modal network request)
+    (v8/*: any*/),
     {
       "alias": null,
       "args": null,
@@ -173,11 +174,7 @@ v10 = {
       "name": "frameRate",
       "storageKey": null
     },
-<<<<<<< HEAD
-    (v6/*: any*/)
-=======
-    (v8/*: any*/)
->>>>>>> ca44d57e9 (modal network request)
+    (v9/*: any*/)
   ],
   "type": "VideoSample",
   "abstractKey": null
@@ -187,7 +184,9 @@ return {
     "argumentDefinitions": [
       (v0/*: any*/),
       (v1/*: any*/),
-      (v2/*: any*/)
+      (v2/*: any*/),
+      (v3/*: any*/),
+      (v4/*: any*/)
     ],
     "kind": "Fragment",
     "metadata": null,
@@ -195,20 +194,15 @@ return {
     "selections": [
       {
         "alias": null,
-        "args": (v3/*: any*/),
+        "args": (v5/*: any*/),
         "concreteType": null,
         "kind": "LinkedField",
         "name": "sample",
         "plural": false,
         "selections": [
-<<<<<<< HEAD
-          (v7/*: any*/),
-          (v8/*: any*/)
-=======
-          (v5/*: any*/),
-          (v9/*: any*/),
-          (v10/*: any*/)
->>>>>>> ca44d57e9 (modal network request)
+          (v6/*: any*/),
+          (v10/*: any*/),
+          (v11/*: any*/)
         ],
         "storageKey": null
       }
@@ -220,43 +214,29 @@ return {
   "operation": {
     "argumentDefinitions": [
       (v0/*: any*/),
+      (v4/*: any*/),
+      (v1/*: any*/),
       (v2/*: any*/),
-      (v1/*: any*/)
+      (v3/*: any*/)
     ],
     "kind": "Operation",
     "name": "mainSampleQuery",
     "selections": [
       {
         "alias": null,
-        "args": (v3/*: any*/),
+        "args": (v5/*: any*/),
         "concreteType": null,
         "kind": "LinkedField",
         "name": "sample",
         "plural": false,
         "selections": [
-<<<<<<< HEAD
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "__typename",
-            "storageKey": null
-          },
-          (v7/*: any*/),
-          (v8/*: any*/),
-          {
-            "kind": "InlineFragment",
-            "selections": [
-              (v4/*: any*/)
-=======
-          (v5/*: any*/),
-          (v9/*: any*/),
+          (v6/*: any*/),
           (v10/*: any*/),
+          (v11/*: any*/),
           {
             "kind": "InlineFragment",
             "selections": [
-              (v6/*: any*/)
->>>>>>> ca44d57e9 (modal network request)
+              (v7/*: any*/)
             ],
             "type": "PointCloudSample",
             "abstractKey": null
@@ -267,20 +247,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "8288bef45852588e173f7ad9366b1cbc",
+    "cacheID": "2b308049942cabaf916a56806344e9cf",
     "id": null,
     "metadata": {},
     "name": "mainSampleQuery",
     "operationKind": "query",
-    "text": "query mainSampleQuery(\n  $dataset: String!\n  $view: BSONArray!\n  $filter: SampleFilter!\n) {\n  sample(dataset: $dataset, view: $view, filter: $filter) {\n    __typename\n    ... on ImageSample {\n      id\n      sample\n      urls {\n        field\n        url\n      }\n    }\n    ... on VideoSample {\n      id\n      sample\n      frameRate\n      urls {\n        field\n        url\n      }\n    }\n    ... on PointCloudSample {\n      id\n    }\n  }\n}\n"
+    "text": "query mainSampleQuery(\n  $dataset: String!\n  $view: BSONArray!\n  $filter: SampleFilter!\n  $filters: JSON\n  $index: Int!\n) {\n  sample(dataset: $dataset, view: $view, filters: $filters, filter: $filter, index: $index) {\n    __typename\n    ... on ImageSample {\n      id\n      sample\n      urls {\n        field\n        url\n      }\n    }\n    ... on VideoSample {\n      id\n      sample\n      frameRate\n      urls {\n        field\n        url\n      }\n    }\n    ... on PointCloudSample {\n      id\n    }\n  }\n}\n"
   }
 };
 })();
 
-<<<<<<< HEAD
-(node as any).hash = "20386ac4db1c242b8eda0747ef22faa1";
-=======
-(node as any).hash = "0d109ba0bd7d1a9df954199a1af114be";
->>>>>>> ca44d57e9 (modal network request)
+(node as any).hash = "f1502abcee059321e8fc092cf2136b17";
 
 export default node;
