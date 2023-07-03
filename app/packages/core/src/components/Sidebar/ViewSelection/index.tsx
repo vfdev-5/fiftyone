@@ -211,6 +211,7 @@ export default function ViewSelection() {
           }}
         />
         <Selection
+          data-testid="saved-views-selectors"
           readonly={!canEditSavedViews}
           selected={selected}
           setSelected={(item: fos.DatasetViewOption) => {
