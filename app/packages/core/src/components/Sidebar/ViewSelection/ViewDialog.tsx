@@ -133,7 +133,7 @@ export default function ViewDialog(props: Props) {
     setNameValue("");
     setDescriptionValue("");
     setColorOption(DEFAULT_COLOR_OPTION);
-  }, []);
+  }, [resetViewContent]);
 
   const onDeleteView = useCallback(() => {
     handleDeleteView(nameValue, () => {
@@ -141,7 +141,7 @@ export default function ViewDialog(props: Props) {
       setIsOpen(false);
       onDeleteSuccess(nameValue);
     });
-  }, [nameValue]);
+  }, [handleDeleteView, nameValue, onDeleteSuccess, resetValues, setIsOpen]);
 
   const onSaveView = useCallback(() => {
     if (isCreating) {
@@ -169,7 +169,19 @@ export default function ViewDialog(props: Props) {
         }
       );
     }
-  }, [view, nameValue, descriptionValue, colorOption?.color]);
+  }, [
+    isCreating,
+    handleCreateSavedView,
+    nameValue,
+    descriptionValue,
+    colorOption.color,
+    view,
+    resetValues,
+    onEditSuccess,
+    setIsOpen,
+    handleUpdateSavedView,
+    initialName,
+  ]);
 
   return (
     <Dialog
@@ -210,6 +222,8 @@ export default function ViewDialog(props: Props) {
           <InputContainer>
             <Label>Name</Label>
             <NameInput
+              autoFocus
+              // aria-label="Your view name"
               placeholder="Your view name"
               value={nameValue}
               onChange={(e) => setNameValue(e.target.value)}
@@ -221,6 +235,7 @@ export default function ViewDialog(props: Props) {
             <Label>Description</Label>
             <DescriptionInput
               rows={5}
+              // aria-label="saved view description"
               placeholder="Enter a description"
               value={descriptionValue}
               onChange={(e) => setDescriptionValue(e.target.value)}
@@ -271,7 +286,10 @@ export default function ViewDialog(props: Props) {
             }}
           >
             <Button
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                resetValues();
+                setIsOpen(false);
+              }}
               sx={{
                 background: theme.background.level1,
                 color: theme.text.primary,

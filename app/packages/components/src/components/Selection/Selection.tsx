@@ -117,7 +117,7 @@ function Selection(props: SelectionProps) {
   );
 
   return (
-    <div ref={ref} style={{ width: "100%" }}>
+    <div ref={ref} style={{ width: "100%" }} id="asdasdd">
       <Select
         value={selectedId}
         defaultValue={selectedId}
@@ -172,12 +172,19 @@ function Selection(props: SelectionProps) {
           },
         }}
         startDecorator={
-          <ColoredDot color={selectedColor || DEFAULT_COLOR_OPTION.color} />
+          <ColoredDot
+            color={selectedColor || DEFAULT_COLOR_OPTION.color}
+            data-cy="testmetoo"
+            id="asdasd"
+          />
         }
         {...(selectedId !== DEFAULT_SELECTED.id &&
           onClear && {
             endDecorator: (
               <IconButton
+                aria-label="clear-me"
+                data-cy="clear-me"
+                data-test-id="clear-me"
                 size="small"
                 onMouseDown={(e) => {
                   e.stopPropagation();
@@ -247,7 +254,10 @@ function Selection(props: SelectionProps) {
                         display: "inline-block",
                       }}
                     >
-                      <ColoredDot color={color || DEFAULT_COLOR_OPTION.color} />
+                      <ColoredDot
+                        color={color || DEFAULT_COLOR_OPTION.color}
+                        data-cy="testme"
+                      />
                     </Box>
                   }
                   compact={compact}
