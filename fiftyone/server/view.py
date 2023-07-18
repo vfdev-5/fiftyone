@@ -122,11 +122,11 @@ def get_view(
                     view, sample_filter.group.id, groups=True
                 )
             if sample_filter.group.slices:
+                view.group_slice = sample_filter.group.slices[0]
                 view = view.select_group_slices(sample_filter.group.slices)
 
         elif sample_filter.id:
             view = fov.make_optimized_select_view(view, sample_filter.id)
-
     if pagination_data:
         # omit all dict field values for performance, not needed by grid
         view = _project_pagination_paths(view)
