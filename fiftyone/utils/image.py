@@ -31,6 +31,7 @@ def reencode_images(
     delete_originals=False,
     num_workers=None,
     skip_failures=False,
+    progress=None,
 ):
     """Re-encodes the images in the sample collection to the given format.
 
@@ -73,6 +74,7 @@ def reencode_images(
             ``multiprocessing.cpu_count()`` is used
         skip_failures (False): whether to gracefully continue without raising
             an error if an image cannot be re-encoded
+        progress (None): whether to render a progress bar
     """
     fov.validate_image_collection(sample_collection)
 
@@ -88,6 +90,7 @@ def reencode_images(
         delete_originals=delete_originals,
         num_workers=num_workers,
         skip_failures=skip_failures,
+        progress=progress,
     )
 
 
@@ -107,6 +110,7 @@ def transform_images(
     delete_originals=False,
     num_workers=None,
     skip_failures=False,
+    progress=None,
 ):
     """Transforms the images in the sample collection according to the provided
     parameters.
@@ -163,6 +167,7 @@ def transform_images(
             ``multiprocessing.cpu_count()`` is used
         skip_failures (False): whether to gracefully continue without raising
             an error if an image cannot be transformed
+        progress (None): whether to render a progress bar
     """
     fov.validate_image_collection(sample_collection)
 
@@ -182,6 +187,7 @@ def transform_images(
         delete_originals=delete_originals,
         num_workers=num_workers,
         skip_failures=skip_failures,
+        progress=progress,
     )
 
 
@@ -245,6 +251,7 @@ def _transform_images(
     delete_originals=False,
     num_workers=None,
     skip_failures=False,
+    progress=None,
 ):
     ext = _parse_ext(ext)
 
@@ -267,6 +274,7 @@ def _transform_images(
             update_filepaths=update_filepaths,
             delete_originals=delete_originals,
             skip_failures=skip_failures,
+            progress=progress,
         )
     else:
         _transform_images_multi(
@@ -285,6 +293,7 @@ def _transform_images(
             update_filepaths=update_filepaths,
             delete_originals=delete_originals,
             skip_failures=skip_failures,
+            progress=progress,
         )
 
 
@@ -303,6 +312,7 @@ def _transform_images_single(
     update_filepaths=True,
     delete_originals=False,
     skip_failures=False,
+    progress=None,
 ):
     if output_field is None:
         output_field = media_field
@@ -311,7 +321,7 @@ def _transform_images_single(
 
     view = sample_collection.select_fields(media_field)
 
-    with fou.ProgressBar() as pb:
+    with fou.ProgressBar(progress=progress) as pb:
         for sample in pb(view):
             inpath = sample[media_field]
 
@@ -355,6 +365,7 @@ def _transform_images_multi(
     update_filepaths=True,
     delete_originals=False,
     skip_failures=False,
+    progress=None,
 ):
     if output_field is None:
         output_field = media_field
@@ -388,7 +399,7 @@ def _transform_images_multi(
     outpaths = {}
 
     try:
-        with fou.ProgressBar(inputs) as pb:
+        with fou.ProgressBar(inputs, progress=progress) as pb:
             with fou.get_multiprocessing_context().Pool(
                 processes=num_workers
             ) as pool:

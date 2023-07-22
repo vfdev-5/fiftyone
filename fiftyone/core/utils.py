@@ -972,7 +972,7 @@ class ResourceLimit(object):
 class ProgressBar(etau.ProgressBar):
     """.. autoclass:: eta.core.utils.ProgressBar"""
 
-    def __init__(self, *args, progress=None, quiet=None, **kwargs):
+    def __init__(self, total=None, progress=None, quiet=None, **kwargs):
         if quiet is not None:
             # Allow overwrite with expected progress attribute
             progress = not quiet
@@ -987,12 +987,31 @@ class ProgressBar(etau.ProgressBar):
         if "iters_str" not in kwargs:
             kwargs["iters_str"] = "samples"
 
+        if progress:
+            kwargs["total"] = total
+        else:
+            kwargs["total"] = None
+
         # For progress bars in notebooks, use a fixed size so that they will
         # read well across browsers, in HTML format, etc
         if foc.is_notebook_context() and "max_width" not in kwargs:
             kwargs["max_width"] = 90
 
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
+
+    def __call__(self, iterable):
+        # Don't compute `len(iterable)` unless necessary
+        no_len = self._quiet and self._total is None
+
+        if no_len:
+            self._total = -1
+
+        super().__call__(iterable)
+
+        if no_len:
+            self._total = None
+
+        return self
 
 
 class DynamicBatcher(object):
@@ -1042,7 +1061,7 @@ class DynamicBatcher(object):
         return_views (False): whether to return each batch as a
             :class:`fiftyone.core.view.DatasetView`. Only applicable when the
             iterable is a :class:`fiftyone.core.collections.SampleCollection`
-        progress (False): whether to render a progress bar tracking the
+        progress (None): whether to render a progress bar tracking the
             consumption of the batches
         total (None): the length of ``iterable``. Only applicable when
             ``progress=True``. If not provided, it is computed via
@@ -1065,6 +1084,9 @@ class DynamicBatcher(object):
 
         if not isinstance(iterable, foc.SampleCollection):
             return_views = False
+
+        if progress is None:
+            progress = fo.config.show_progress_bars
 
         self.iterable = iterable
         self.target_latency = target_latency
@@ -1104,22 +1126,20 @@ class DynamicBatcher(object):
         else:
             self._iter = iter(self.iterable)
 
-        if self._in_context:
-            total = self.total
-            if total is None:
-                try:
-                    total = len(self.iterable)
-                except:
-                    pass
+        if self.progress:
+            if self._in_context:
+                total = self.total
+                if total is None:
+                    total = self.iterable
 
-            self._pb = ProgressBar(total=total, progress=self.progress)
-            self._pb.__enter__()
-        else:
-            logger.warning(
-                "DynamicBatcher must be invoked as a context manager in "
-                "order to print progress"
-            )
-            self.progress = False
+                self._pb = ProgressBar(total=total, progress=self.progress)
+                self._pb.__enter__()
+            else:
+                logger.warning(
+                    "DynamicBatcher must be invoked as a context manager in "
+                    "order to print progress"
+                )
+                self.progress = False
 
         return self
 

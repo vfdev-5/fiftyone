@@ -248,9 +248,7 @@ def compute_metadata(
             ``multiprocessing.cpu_count()`` is used
         skip_failures (True): whether to gracefully continue without raising an
             error if metadata cannot be computed for a sample
-        progress (None): whether to show the progress bar of the import.
-            If None this uses the global setting, otherwise it overwrites
-            the setting for this method.
+        progress (None): whether to render a progress bar
     """
     if num_workers is None:
         num_workers = multiprocessing.cpu_count()

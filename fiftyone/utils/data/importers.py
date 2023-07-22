@@ -56,6 +56,7 @@ def import_samples(
     expand_schema=True,
     dynamic=False,
     add_info=True,
+    progress=None,
 ):
     """Adds the samples from the given :class:`DatasetImporter` to the dataset.
 
@@ -86,6 +87,7 @@ def import_samples(
             document fields that are encountered
         add_info (True): whether to add dataset info from the importer (if
             any) to the dataset
+        progress (None): whether to render a progress bar
 
     Returns:
         a list of IDs of the samples that were added to the dataset
@@ -113,7 +115,9 @@ def import_samples(
             )
 
         with dataset_importer:
-            return dataset_importer.import_samples(dataset, tags=tags)
+            return dataset_importer.import_samples(
+                dataset, tags=tags, progress=progress
+            )
 
     #
     # Non-batch imports
@@ -129,11 +133,6 @@ def import_samples(
             dynamic,
         )
 
-        try:
-            num_samples = len(dataset_importer)
-        except:
-            num_samples = None
-
         if isinstance(dataset_importer, GroupDatasetImporter):
             samples = _generate_group_samples(dataset_importer, parse_sample)
         else:
@@ -143,7 +142,8 @@ def import_samples(
             samples,
             expand_schema=expand_schema,
             dynamic=dynamic,
-            num_samples=num_samples,
+            progress=progress,
+            num_samples=dataset_importer,
         )
 
         if add_info and dataset_importer.has_dataset_info:
@@ -173,6 +173,7 @@ def merge_samples(
     expand_schema=True,
     dynamic=False,
     add_info=True,
+    progress=None,
 ):
     """Merges the samples from the given :class:`DatasetImporter` into the
     dataset.
@@ -264,6 +265,7 @@ def merge_samples(
             document fields that are encountered
         add_info (True): whether to add dataset info from the importer (if any)
             to the dataset
+        progress (None): whether to render a progress bar
     """
     if etau.is_str(tags):
         tags = [tags]
@@ -281,7 +283,9 @@ def merge_samples(
 
         try:
             with dataset_importer:
-                dataset_importer.import_samples(tmp, tags=tags)
+                dataset_importer.import_samples(
+                    tmp, tags=tags, progress=progress
+                )
 
             dataset.merge_samples(
                 tmp,
@@ -316,11 +320,6 @@ def merge_samples(
             dynamic,
         )
 
-        try:
-            num_samples = len(dataset_importer)
-        except:
-            num_samples = None
-
         if isinstance(dataset_importer, GroupDatasetImporter):
             samples = _generate_group_samples(dataset_importer, parse_sample)
         else:
@@ -338,7 +337,8 @@ def merge_samples(
             overwrite=overwrite,
             expand_schema=expand_schema,
             dynamic=dynamic,
-            num_samples=num_samples,
+            progress=progress,
+            num_samples=dataset_importer,
         )
 
         if add_info and dataset_importer.has_dataset_info:
@@ -980,12 +980,13 @@ class BatchDatasetImporter(DatasetImporter):
     def has_dataset_info(self):
         return False
 
-    def import_samples(self, dataset, tags=None):
+    def import_samples(self, dataset, tags=None, progress=None):
         """Imports the samples into the given dataset.
 
         Args:
             dataset: a :class:`fiftyone.core.dataset.Dataset`
             tags (None): an optional list of tags to attach to each sample
+            progress (None): whether to render a progress bar
 
         Returns:
             a list of IDs of the samples that were added to the dataset
@@ -1743,7 +1744,7 @@ class FiftyOneDatasetImporter(BatchDatasetImporter):
             else:
                 self._has_frames = False
 
-    def import_samples(self, dataset, tags=None):
+    def import_samples(self, dataset, tags=None, progress=None):
         dataset_dict = foo.import_document(self._metadata_path)
 
         if len(dataset) > 0 and fomi.needs_migration(
@@ -1757,7 +1758,7 @@ class FiftyOneDatasetImporter(BatchDatasetImporter):
 
             try:
                 sample_ids = self._import_samples(
-                    tmp_dataset, dataset_dict, tags=tags
+                    tmp_dataset, dataset_dict, tags=tags, progress=progress
                 )
                 dataset.add_collection(tmp_dataset)
             finally:
@@ -1765,9 +1766,11 @@ class FiftyOneDatasetImporter(BatchDatasetImporter):
 
             return sample_ids
 
-        return self._import_samples(dataset, dataset_dict, tags=tags)
+        return self._import_samples(
+            dataset, dataset_dict, tags=tags, progress=progress
+        )
 
-    def _import_samples(self, dataset, dataset_dict, tags=None):
+    def _import_samples(self, dataset, dataset_dict, tags=None, progress=None):
         name = dataset.name
         empty_import = not bool(dataset)
 
@@ -1861,7 +1864,7 @@ class FiftyOneDatasetImporter(BatchDatasetImporter):
             map(_parse_sample, samples),
             dataset._sample_collection,
             ordered=self.ordered,
-            progress=True,
+            progress=progress,
             num_docs=num_samples,
         )
 
@@ -1889,7 +1892,7 @@ class FiftyOneDatasetImporter(BatchDatasetImporter):
                 map(_parse_frame, frames),
                 dataset._frame_collection,
                 ordered=self.ordered,
-                progress=True,
+                progress=progress,
                 num_docs=num_frames,
             )
 

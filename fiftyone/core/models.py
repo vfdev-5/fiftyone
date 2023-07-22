@@ -56,6 +56,7 @@ def apply_model(
     skip_failures=True,
     output_dir=None,
     rel_dir=None,
+    progress=None,
     **kwargs,
 ):
     """Applies the :class:`FiftyOne model <Model>` or
@@ -99,6 +100,7 @@ def apply_model(
             ``output_dir`` that match the shape of the input paths. The path is
             converted to an absolute path (if necessary) via
             :func:`fiftyone.core.utils.normalize_path`
+        progress (None): whether to render a progress bar
         **kwargs: optional model-specific keyword arguments passed through
             to the underlying inference implementation
     """
@@ -197,6 +199,7 @@ def apply_model(
                 confidence_thresh,
                 skip_failures,
                 filename_maker,
+                progress,
             )
 
         batch_size = _parse_batch_size(batch_size, model, use_data_loader)
@@ -213,6 +216,7 @@ def apply_model(
                     batch_size,
                     skip_failures,
                     filename_maker,
+                    progress,
                 )
 
             return _apply_image_model_to_frames_single(
@@ -222,6 +226,7 @@ def apply_model(
                 confidence_thresh,
                 skip_failures,
                 filename_maker,
+                progress,
             )
 
         if use_data_loader:
@@ -234,6 +239,7 @@ def apply_model(
                 num_workers,
                 skip_failures,
                 filename_maker,
+                progress,
             )
 
         if batch_size is not None:
@@ -245,6 +251,7 @@ def apply_model(
                 batch_size,
                 skip_failures,
                 filename_maker,
+                progress,
             )
 
         return _apply_image_model_single(
@@ -254,6 +261,7 @@ def apply_model(
             confidence_thresh,
             skip_failures,
             filename_maker,
+            progress,
         )
 
 
@@ -275,10 +283,11 @@ def _apply_image_model_single(
     confidence_thresh,
     skip_failures,
     filename_maker,
+    progress,
 ):
     samples = samples.select_fields()
 
-    with fou.ProgressBar() as pb:
+    with fou.ProgressBar(progress=progress) as pb:
         for sample in pb(samples):
             try:
                 img = etai.read(sample.filepath)
@@ -308,11 +317,12 @@ def _apply_image_model_batch(
     batch_size,
     skip_failures,
     filename_maker,
+    progress,
 ):
     samples = samples.select_fields()
     samples_loader = fou.iter_batches(samples, batch_size)
 
-    with fou.ProgressBar(samples) as pb:
+    with fou.ProgressBar(samples, progress=progress) as pb:
         for sample_batch in samples_loader:
             try:
                 imgs = [etai.read(sample.filepath) for sample in sample_batch]
@@ -352,6 +362,7 @@ def _apply_image_model_data_loader(
     num_workers,
     skip_failures,
     filename_maker,
+    progress,
 ):
     samples = samples.select_fields()
     samples_loader = fou.iter_batches(samples, batch_size)
@@ -359,7 +370,7 @@ def _apply_image_model_data_loader(
         samples, model, batch_size, num_workers, skip_failures
     )
 
-    with fou.ProgressBar(samples) as pb:
+    with fou.ProgressBar(samples, progress=progress) as pb:
         for sample_batch, imgs in zip(samples_loader, data_loader):
             try:
                 if isinstance(imgs, Exception):
@@ -399,12 +410,13 @@ def _apply_image_model_to_frames_single(
     confidence_thresh,
     skip_failures,
     filename_maker,
+    progress,
 ):
     samples = samples.select_fields()
     frame_counts, total_frame_count = _get_frame_counts(samples)
     is_clips = samples._dataset._is_clips
 
-    with fou.ProgressBar(total=total_frame_count) as pb:
+    with fou.ProgressBar(total=total_frame_count, progress=progress) as pb:
         for idx, sample in enumerate(samples):
             if is_clips:
                 frames = etaf.FrameRange(*sample.support)
@@ -450,12 +462,13 @@ def _apply_image_model_to_frames_batch(
     batch_size,
     skip_failures,
     filename_maker,
+    progress,
 ):
     samples = samples.select_fields()
     frame_counts, total_frame_count = _get_frame_counts(samples)
     is_clips = samples._dataset._is_clips
 
-    with fou.ProgressBar(total=total_frame_count) as pb:
+    with fou.ProgressBar(total=total_frame_count, progress=progress) as pb:
         for idx, sample in enumerate(samples):
             if is_clips:
                 frames = etaf.FrameRange(*sample.support)
@@ -504,11 +517,12 @@ def _apply_video_model(
     confidence_thresh,
     skip_failures,
     filename_maker,
+    progress,
 ):
     samples = samples.select_fields()
     is_clips = samples._dataset._is_clips
 
-    with fou.ProgressBar() as pb:
+    with fou.ProgressBar(progress=progress) as pb:
         for sample in pb(samples):
             if is_clips:
                 frames = etaf.FrameRange(*sample.support)
@@ -672,6 +686,7 @@ def compute_embeddings(
     batch_size=None,
     num_workers=None,
     skip_failures=True,
+    progress=None,
     **kwargs,
 ):
     """Computes embeddings for the samples in the collection using the given
@@ -708,6 +723,7 @@ def compute_embeddings(
         skip_failures (True): whether to gracefully continue without raising an
             error if embeddings cannot be generated for a sample. Only
             applicable to :class:`Model` instances
+        progress (None): whether to render a progress bar
         **kwargs: optional model-specific keyword arguments passed through
             to the underlying inference implementation
 
@@ -810,7 +826,7 @@ def compute_embeddings(
 
         if samples.media_type == fom.VIDEO and model.media_type == "video":
             return _compute_video_embeddings(
-                samples, model, embeddings_field, skip_failures
+                samples, model, embeddings_field, skip_failures, progress
             )
 
         batch_size = _parse_batch_size(batch_size, model, use_data_loader)
@@ -818,11 +834,16 @@ def compute_embeddings(
         if samples.media_type == fom.VIDEO and model.media_type == "image":
             if batch_size is not None:
                 return _compute_frame_embeddings_batch(
-                    samples, model, embeddings_field, batch_size, skip_failures
+                    samples,
+                    model,
+                    embeddings_field,
+                    batch_size,
+                    skip_failures,
+                    progress,
                 )
 
             return _compute_frame_embeddings_single(
-                samples, model, embeddings_field, skip_failures
+                samples, model, embeddings_field, skip_failures, progress
             )
 
         if use_data_loader:
@@ -833,27 +854,33 @@ def compute_embeddings(
                 batch_size,
                 num_workers,
                 skip_failures,
+                progress,
             )
 
         if batch_size is not None:
             return _compute_image_embeddings_batch(
-                samples, model, embeddings_field, batch_size, skip_failures
+                samples,
+                model,
+                embeddings_field,
+                batch_size,
+                skip_failures,
+                progress,
             )
 
         return _compute_image_embeddings_single(
-            samples, model, embeddings_field, skip_failures
+            samples, model, embeddings_field, skip_failures, progress
         )
 
 
 def _compute_image_embeddings_single(
-    samples, model, embeddings_field, skip_failures
+    samples, model, embeddings_field, skip_failures, progress
 ):
     samples = samples.select_fields()
     embeddings = []
 
     errors = False
 
-    with fou.ProgressBar() as pb:
+    with fou.ProgressBar(progress=progress) as pb:
         for sample in pb(samples):
             embedding = None
 
@@ -883,7 +910,7 @@ def _compute_image_embeddings_single(
 
 
 def _compute_image_embeddings_batch(
-    samples, model, embeddings_field, batch_size, skip_failures
+    samples, model, embeddings_field, batch_size, skip_failures, progress
 ):
     samples = samples.select_fields()
     samples_loader = fou.iter_batches(samples, batch_size)
@@ -891,7 +918,7 @@ def _compute_image_embeddings_batch(
     embeddings = []
     errors = False
 
-    with fou.ProgressBar(samples) as pb:
+    with fou.ProgressBar(samples, progress=progress) as pb:
         for sample_batch in samples_loader:
             embeddings_batch = [None] * len(sample_batch)
 
@@ -929,7 +956,13 @@ def _compute_image_embeddings_batch(
 
 
 def _compute_image_embeddings_data_loader(
-    samples, model, embeddings_field, batch_size, num_workers, skip_failures
+    samples,
+    model,
+    embeddings_field,
+    batch_size,
+    num_workers,
+    skip_failures,
+    progress,
 ):
     samples = samples.select_fields()
     samples_loader = fou.iter_batches(samples, batch_size)
@@ -940,7 +973,7 @@ def _compute_image_embeddings_data_loader(
     embeddings = []
     errors = False
 
-    with fou.ProgressBar(samples) as pb:
+    with fou.ProgressBar(samples, progress=progress) as pb:
         for sample_batch, imgs in zip(samples_loader, data_loader):
             embeddings_batch = [None] * len(sample_batch)
 
@@ -980,7 +1013,7 @@ def _compute_image_embeddings_data_loader(
 
 
 def _compute_frame_embeddings_single(
-    samples, model, embeddings_field, skip_failures
+    samples, model, embeddings_field, skip_failures, progress
 ):
     samples = samples.select_fields()
     frame_counts, total_frame_count = _get_frame_counts(samples)
@@ -988,7 +1021,7 @@ def _compute_frame_embeddings_single(
 
     embeddings_dict = {}
 
-    with fou.ProgressBar(total=total_frame_count) as pb:
+    with fou.ProgressBar(total=total_frame_count, progress=progress) as pb:
         for idx, sample in enumerate(samples):
             embeddings = []
 
@@ -1039,7 +1072,7 @@ def _compute_frame_embeddings_single(
 
 
 def _compute_frame_embeddings_batch(
-    samples, model, embeddings_field, batch_size, skip_failures
+    samples, model, embeddings_field, batch_size, skip_failures, progress
 ):
     samples = samples.select_fields()
     frame_counts, total_frame_count = _get_frame_counts(samples)
@@ -1047,7 +1080,7 @@ def _compute_frame_embeddings_batch(
 
     embeddings_dict = {}
 
-    with fou.ProgressBar(total=total_frame_count) as pb:
+    with fou.ProgressBar(total=total_frame_count, progress=progress) as pb:
         for idx, sample in enumerate(samples):
             embeddings = []
 
@@ -1102,14 +1135,16 @@ def _compute_frame_embeddings_batch(
     return embeddings_dict
 
 
-def _compute_video_embeddings(samples, model, embeddings_field, skip_failures):
+def _compute_video_embeddings(
+    samples, model, embeddings_field, skip_failures, progress
+):
     samples = samples.select_fields()
     is_clips = samples._dataset._is_clips
 
     embeddings = []
     errors = False
 
-    with fou.ProgressBar() as pb:
+    with fou.ProgressBar(progress=progress) as pb:
         for sample in pb(samples):
             if is_clips:
                 frames = etaf.FrameRange(*sample.support)
@@ -1155,6 +1190,7 @@ def compute_patch_embeddings(
     batch_size=None,
     num_workers=None,
     skip_failures=True,
+    progress=None,
 ):
     """Computes embeddings for the image patches defined by ``patches_field``
     of the samples in the collection using the given :class:`Model`.
@@ -1205,6 +1241,7 @@ def compute_patch_embeddings(
             Only applicable for Torch models
         skip_failures (True): whether to gracefully continue without raising an
             error if embeddings cannot be generated for a sample
+        progress (None): whether to render a progress bar
 
     Returns:
         one of the following:
@@ -1318,6 +1355,7 @@ def compute_patch_embeddings(
                 handle_missing,
                 batch_size,
                 skip_failures,
+                progress,
             )
 
         if use_data_loader:
@@ -1332,6 +1370,7 @@ def compute_patch_embeddings(
                 batch_size,
                 num_workers,
                 skip_failures,
+                progress,
             )
 
         return _embed_patches(
@@ -1344,6 +1383,7 @@ def compute_patch_embeddings(
             handle_missing,
             batch_size,
             skip_failures,
+            progress,
         )
 
 
@@ -1357,6 +1397,7 @@ def _embed_patches(
     handle_missing,
     batch_size,
     skip_failures,
+    progress,
 ):
     samples = samples.select_fields(patches_field)
 
@@ -1365,7 +1406,7 @@ def _embed_patches(
     else:
         embeddings_dict = {}
 
-    with fou.ProgressBar() as pb:
+    with fou.ProgressBar(progress=progress) as pb:
         for sample in pb(samples):
             embeddings = None
 
@@ -1453,6 +1494,7 @@ def _embed_patches_data_loader(
     batch_size,
     num_workers,
     skip_failures,
+    progress,
 ):
     samples = samples.select_fields(patches_field)
 
@@ -1472,7 +1514,7 @@ def _embed_patches_data_loader(
     else:
         embeddings_dict = {}
 
-    with fou.ProgressBar(samples) as pb:
+    with fou.ProgressBar(samples, progress=progress) as pb:
         for sample, patches in pb(zip(samples, data_loader)):
             embeddings = None
 
@@ -1520,6 +1562,7 @@ def _embed_frame_patches(
     handle_missing,
     batch_size,
     skip_failures,
+    progress,
 ):
     _patches_field = samples._FRAMES_PREFIX + patches_field
     samples = samples.select_fields(_patches_field)
@@ -1531,7 +1574,7 @@ def _embed_frame_patches(
     else:
         embeddings_dict = {}
 
-    with fou.ProgressBar(total=total_frame_count) as pb:
+    with fou.ProgressBar(total=total_frame_count, progress=progress) as pb:
         for idx, sample in enumerate(samples):
             if is_clips:
                 frames = etaf.FrameRange(*sample.support)

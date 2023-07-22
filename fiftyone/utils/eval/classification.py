@@ -30,6 +30,7 @@ def evaluate_classifications(
     classes=None,
     missing=None,
     method="simple",
+    progress=None,
     **kwargs,
 ):
     """Evaluates the classification predictions in the given collection with
@@ -74,6 +75,7 @@ def evaluate_classifications(
             given this label for results purposes
         method ("simple"): a string specifying the evaluation method to use.
             Supported values are ``("simple", "binary", "top-k")``
+        progress (None): whether to render a progress bar
         **kwargs: optional keyword arguments for the constructor of the
             :class:`ClassificationEvaluationConfig` being used
 
@@ -92,7 +94,11 @@ def evaluate_classifications(
     eval_method.register_samples(samples, eval_key)
 
     results = eval_method.evaluate_samples(
-        samples, eval_key=eval_key, classes=classes, missing=missing
+        samples,
+        eval_key=eval_key,
+        classes=classes,
+        missing=missing,
+        progress=progress,
     )
     eval_method.save_run_results(samples, eval_key, results)
 
@@ -137,7 +143,7 @@ class ClassificationEvaluation(foe.EvaluationMethod):
         raise NotImplementedError("subclass must implement register_samples()")
 
     def evaluate_samples(
-        self, samples, eval_key=None, classes=None, missing=None
+        self, samples, eval_key=None, classes=None, missing=None, progress=None
     ):
         """Evaluates the predicted classifications in the given samples with
         respect to the specified ground truth labels.
@@ -150,6 +156,7 @@ class ClassificationEvaluation(foe.EvaluationMethod):
                 purposes
             missing (None): a missing label string. Any None-valued labels are
                 given this label for results purposes
+            progress (None): whether to render a progress bar
 
         Returns:
             a :class:`ClassificationResults` instance
@@ -245,7 +252,7 @@ class SimpleEvaluation(ClassificationEvaluation):
             dataset.add_sample_field(eval_key, fof.BooleanField)
 
     def evaluate_samples(
-        self, samples, eval_key=None, classes=None, missing=None
+        self, samples, eval_key=None, classes=None, missing=None, progress=None
     ):
         pred_field = self.config.pred_field
         gt_field = self.config.gt_field
@@ -360,7 +367,7 @@ class TopKEvaluation(ClassificationEvaluation):
             dataset.add_sample_field(eval_key, fof.BooleanField)
 
     def evaluate_samples(
-        self, samples, eval_key=None, classes=None, missing=None
+        self, samples, eval_key=None, classes=None, missing=None, progress=None
     ):
         if classes is None:
             raise ValueError(
@@ -562,7 +569,7 @@ class BinaryEvaluation(ClassificationEvaluation):
             dataset.add_sample_field(eval_key, fof.StringField)
 
     def evaluate_samples(
-        self, samples, eval_key=None, classes=None, missing=None
+        self, samples, eval_key=None, classes=None, missing=None, progress=None
     ):
         if classes is None or len(classes) != 2:
             raise ValueError(

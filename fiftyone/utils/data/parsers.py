@@ -25,7 +25,7 @@ import fiftyone.utils.eta as foue
 fouv = fou.lazy_import("fiftyone.utils.video")
 
 
-def add_images(dataset, samples, sample_parser, tags=None):
+def add_images(dataset, samples, sample_parser, tags=None, progress=None):
     """Adds the given images to the dataset.
 
     This operation does not read the images.
@@ -41,6 +41,7 @@ def add_images(dataset, samples, sample_parser, tags=None):
             parse the samples
         tags (None): an optional tag or iterable of tags to attach to each
             sample
+        progress (None): whether to render a progress bar
 
     Returns:
         a list of IDs of the samples that were added to the dataset
@@ -77,14 +78,12 @@ def add_images(dataset, samples, sample_parser, tags=None):
 
         return Sample(filepath=image_path, metadata=metadata, tags=tags)
 
-    try:
-        num_samples = len(samples)
-    except:
-        num_samples = None
-
     _samples = map(parse_sample, samples)
     return dataset.add_samples(
-        _samples, num_samples=num_samples, expand_schema=False
+        _samples,
+        expand_schema=False,
+        progress=progress,
+        num_samples=samples,
     )
 
 
@@ -96,6 +95,7 @@ def add_labeled_images(
     tags=None,
     expand_schema=True,
     dynamic=False,
+    progress=None,
 ):
     """Adds the given labeled images to the dataset.
 
@@ -128,6 +128,7 @@ def add_labeled_images(
             if a sample's schema is not a subset of the dataset schema
         dynamic (False): whether to declare dynamic attributes of embedded
             document fields that are encountered
+        progress (None): whether to render a progress bar
 
     Returns:
         a list of IDs of the samples that were added to the dataset
@@ -192,21 +193,17 @@ def add_labeled_images(
         dataset._ensure_label_field(label_field, sample_parser.label_cls)
         expand_schema = False
 
-    try:
-        num_samples = len(samples)
-    except:
-        num_samples = None
-
     _samples = map(parse_sample, samples)
     return dataset.add_samples(
         _samples,
         expand_schema=expand_schema,
         dynamic=dynamic,
-        num_samples=num_samples,
+        progress=progress,
+        num_samples=samples,
     )
 
 
-def add_videos(dataset, samples, sample_parser, tags=None):
+def add_videos(dataset, samples, sample_parser, tags=None, progress=None):
     """Adds the given videos to the dataset.
 
     This operation does not read the videos.
@@ -222,6 +219,7 @@ def add_videos(dataset, samples, sample_parser, tags=None):
             parse the samples
         tags (None): an optional tag or iterable of tags to attach to each
             sample
+        progress (None): whether to render a progress bar
 
     Returns:
         a list of IDs of the samples that were added to the dataset
@@ -252,16 +250,13 @@ def add_videos(dataset, samples, sample_parser, tags=None):
 
         return Sample(filepath=video_path, metadata=metadata, tags=tags)
 
-    try:
-        num_samples = len(samples)
-    except:
-        num_samples = None
-
-    _samples = map(parse_sample, samples)
-
     # @todo: skip schema expansion and set media type before adding samples
+    _samples = map(parse_sample, samples)
     return dataset.add_samples(
-        _samples, num_samples=num_samples, expand_schema=True
+        _samples,
+        expand_schema=True,
+        progress=progress,
+        num_samples=samples,
     )
 
 
@@ -273,6 +268,7 @@ def add_labeled_videos(
     tags=None,
     expand_schema=True,
     dynamic=False,
+    progress=None,
 ):
     """Adds the given labeled videos to the dataset.
 
@@ -304,6 +300,7 @@ def add_labeled_videos(
             if a sample's schema is not a subset of the dataset schema
         dynamic (False): whether to declare dynamic attributes of embedded
             document fields that are encountered
+        progress (None): whether to render a progress bar
 
     Returns:
         a list of IDs of the samples that were added to the dataset
@@ -366,17 +363,13 @@ def add_labeled_videos(
 
         return sample
 
-    try:
-        num_samples = len(samples)
-    except:
-        num_samples = None
-
     _samples = map(parse_sample, samples)
     return dataset.add_samples(
         _samples,
         expand_schema=expand_schema,
         dynamic=dynamic,
-        num_samples=num_samples,
+        progress=progress,
+        num_samples=samples,
     )
 
 
