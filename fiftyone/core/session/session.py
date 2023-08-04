@@ -182,32 +182,21 @@ def launch_app(
     """
     global _session  # pylint: disable=global-statement
 
-    #
-    # Note, we always `close_app()` here rather than just calling
-    # `session.open()` if a session already exists, because the app may have
-    # been closed in some way other than `session.close()` --- e.g., the user
-    # closing the GUI --- in which case the underlying Electron process may
-    # still exist; in this case, `session.open()` does not seem to reopen the
-    # app
-    #
-    # @todo this can probably be improved
-    #
-    close_app()
-
-    _session = Session(
-        dataset=dataset,
-        view=view,
-        spaces=spaces,
-        color_scheme=color_scheme,
-        plots=plots,
-        port=port,
-        address=address,
-        remote=remote,
-        desktop=desktop,
-        height=height,
-        auto=auto,
-        config=config,
-    )
+    if _session is None:
+        _session = Session(
+            dataset=dataset,
+            view=view,
+            spaces=spaces,
+            color_scheme=color_scheme,
+            plots=plots,
+            port=port,
+            address=address,
+            remote=remote,
+            desktop=desktop,
+            height=height,
+            auto=auto,
+            config=config,
+        )
 
     if _session.remote:
         logger.info(_REMOTE_INSTRUCTIONS.strip().format(_session.server_port))
