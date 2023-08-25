@@ -176,6 +176,7 @@ export default ({
               placeholder={"group by"}
               useSearch={groupByOptionsSearchSelector}
               value={groupBy ?? ""}
+              overflowContainer={true}
             />
             <TabOption
               active={useOrdered ? "ordered" : "unordered"}
@@ -201,6 +202,7 @@ export default ({
                 component={SelectorValueComponent}
                 onSelect={setOrderBy}
                 overflow={true}
+                overflowContainer={true}
                 placeholder={"order by"}
                 useSearch={groupByOptionsSearchSelector}
                 value={orderBy ?? ""}

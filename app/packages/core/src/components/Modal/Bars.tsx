@@ -99,6 +99,9 @@ export const GroupBar: React.FC<{
             fontWeight: "bold",
             alignItems: "center",
             columnGap: "0.25rem",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            marginRight: "0.5rem",
           }}
         >
           <Pin />

@@ -1,12 +1,11 @@
-import React, { Ref, RefObject, useLayoutEffect, useState } from "react";
 import { useSpring } from "@react-spring/web";
+import React, { RefObject, useLayoutEffect, useState } from "react";
 
 import { PopoutDiv } from "../utils";
 
 const Popout = ({
   children,
   style = {},
-  modal,
   fixed,
   anchorRef,
 }: PopoutPropsType) => {
@@ -35,7 +34,7 @@ const Popout = ({
         ...show,
         ...style,
         zIndex: 100001,
-        right: modal ? 0 : "unset",
+        right: "unset",
         ...positionStyle,
       }}
     >
