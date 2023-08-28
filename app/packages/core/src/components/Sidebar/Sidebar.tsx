@@ -434,6 +434,7 @@ const InteractiveSidebar = ({
     () => new Controller({ minHeight: 0 })
   );
 
+  console.log("items", items);
   const modalContainer = document.getElementById("modal");
 
   if (entries instanceof Error) {
@@ -769,6 +770,7 @@ const InteractiveSidebar = ({
           <Container style={containerController.springs}>
             {order.current.map((key) => {
               const entry = items.current[key].entry;
+              console.log("order", order, entry);
               if (entry.kind === fos.EntryKind.GROUP) {
                 group = entry.name;
               }
@@ -778,6 +780,8 @@ const InteractiveSidebar = ({
               const keyTrigger = ["tags", "_label_tags"].includes(key[1])
                 ? null
                 : trigger;
+
+              console.log("k", key, group, entry);
               const { children } = render(
                 key,
                 group,
