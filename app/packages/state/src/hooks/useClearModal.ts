@@ -32,6 +32,7 @@ export default () => {
         set(fos.selectedLabels, {});
         set(fos.hiddenLabels, {});
         set(fos.currentModalSample, null);
+        set(fos.hideNoneFields, false);
       },
     []
   );
